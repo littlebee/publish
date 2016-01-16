@@ -1,0 +1,67 @@
+// The ui-variables file is provided by base themes provided by Atom.
+//
+// See https://github.com/atom/atom-dark-ui/blob/master/styles/ui-variables.less
+// for a full listing of what's available.
+@import "ui-variables";
+
+.publish-modal-backdrop {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  display: none;
+  top: 0px;
+  left: 0px;
+  z-index: 5;
+  background-color: rgba(0, 0, 0, .5);
+}
+
+.publish-modal {
+  position: absolute;
+  height: 300px;
+  width: 400px;
+  display: block;
+  top: 20px;
+  left: 50%;
+  z-index: 6;
+  background-color: @base-background-color;
+  
+  label {
+    color: grey;
+  }
+  
+  input {
+    margin-bottom: 12px;
+    margin-left: 7px;
+  }
+  
+  textarea {
+    height: 157px;
+    width: 373px;
+    resize: none;
+  }
+  
+  input:focus, textarea:focus, button:focus {
+    border: 1px solid rgba(82, 168, 236, 0.8);
+    outline: 0;
+    outline: thin dotted \9;
+    box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(82,168,236,.6);    
+  }
+}
+
+.modal-header {
+  padding: 8px 3px 4px 8px;
+  margin-bottom: 5px;
+}
+.modal-header, .modal-footer {
+  background-color: whitesmoke;
+}
+.modal-body {
+  padding: 8px 3px 4px 14px;
+  height: ~"calc(100% - 95px)";
+  overflow: auto;
+}
+
+.modal-footer {
+  padding: 11px 3px 9px 8px;
+}
+

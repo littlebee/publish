@@ -1,0 +1,28 @@
+{
+  "name": "publish",
+  "main": "./lib/publish",
+  "version": "0.0.0",
+  "description": "Atom package to publish to NPM or APM and update change log",
+  "keywords": [
+    "apm",
+    "npm",
+    "publish",
+    "version",
+    "changelog"
+  ],
+  "activationEvents": [
+    "publish:major",
+    "publish:minor",
+    "publish:patch",
+    "publish:version"
+  ],
+  "repository": "https://github.com/atom/publish",
+  "license": "MIT",
+  "engines": {
+    "atom": ">=1.0.0 <2.0.0"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "atom-space-pen-views": "^2.1.0"
+  }
+}
