@@ -36,6 +36,11 @@ module.exports = class PublishView extends View
     super
     @newVersion.focus()
     
+    
+  hide: () =>
+    super
+    
+    
 
   destroy: () =>
     @subscriptions.destroy()

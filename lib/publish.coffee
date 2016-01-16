@@ -1,6 +1,11 @@
 
+Fs = require 'fs'
+Path = require 'path'
+_ = require 'underscore'
+
 PublishView = require './publish-view'
 {TextEditor, CompositeDisposable} = require 'atom'
+
 
 module.exports = Publish =
   publishView: null
@@ -22,6 +27,8 @@ module.exports = Publish =
     @subscriptions.add @publishView.on "publish", (evt, publishInputs)->
       console.log evt
       alert "yay, you published #{publishInputs.newVersion} with description: '#{publishInputs.description.slice(0, 10)}...'"
+    
+    @getCurrentVersion()
     
   deactivate: ->
     @subscriptions.dispose()
@@ -46,7 +53,20 @@ module.exports = Publish =
   version: ->
     
     
+  getCurrentVersion: ->
+    packageFiles = {}
+    for path in atom.project.getPaths()
+      pkgFile = Path.join(path, 'package.json')
+      if Fs.existsSync(pkgFile)
+        packageFiles[path] = JSON.parse(Fs.readFileSync(pkgFile).toString())
     
+    if _.keys(packageFiles).length > 0
+      console.log 'found more than one package file'
+      
+    
+    
+    
+  
   
     
     
