@@ -23,9 +23,36 @@ module.exports = class PublishProgressView extends DialogView
     @saveButton.hide()
     
     
+  show: () ->
+    super
+    @showCancelButton()
+
+    
     
   messageUser: (message) ->
     @currentMessages += "<p>#{message}</p>"
     @$console.html(@currentMessages)
     
+    
+  # primarily toggles cancel button to OK and 
+  done: (message="") ->
+    @showOkButton()
+            
+    
+  showCancelButton: () ->
+    @cancelButton.text("cancel")
+    .addClass('btn-error')
+    .removeClass('btn-primary')
+    
+    # to cancel an operation must be with intent
+    @instanceOptions.closeOnClickoff = false
+    
+    
+  showOkButton: () ->
+    @cancelButton.text(" ok ")
+    .removeClass('btn-error')
+    .addClass('btn-primary')
+    .focus()
+
+    @instanceOptions.closeOnClickoff = true
     

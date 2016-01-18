@@ -132,6 +132,8 @@ module.exports = Publish =
     @publishProgressView.messageUser "yay, you published #{attributes.newVersion} with description: '#{attributes.description.slice(0, 10)}...' " +
       "and #{attributes.commits.length} commits"
       
+    _.delay (=>@publishProgressView.done()), 3000
+      
   
     
     

@@ -5,7 +5,7 @@ DialogView = require './dialog-view'
 
 module.exports = class PublishView extends DialogView
   
-  @getTitle: () =>
+  @getTitle: () => ""
     
   
   @innerContent: () ->
@@ -20,7 +20,7 @@ module.exports = class PublishView extends DialogView
         outlet: "description"
     @div class: "right", =>
       @h5 class: "commit-count"
-      @div class: "commits"
+      @div class: "commits scrollbars-visible-always"
       @div class: "scroll-shadow"
     
     
@@ -65,10 +65,7 @@ module.exports = class PublishView extends DialogView
     return """
       <div class="commit">
         <a href="#{commit.link}">#{commit.hash}</a> 
-        by #{commit.authorName} #{commit.relativeDate}:
-        <div>
-          #{commit.message}
-        </div>
+        by #{commit.authorName} #{commit.relativeDate}: #{commit.message}
       </div>
     """
     

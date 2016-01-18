@@ -17,7 +17,7 @@ module.exports = class DialogView extends View
         
         @div class: "modal-footer", =>
           @button "save", class: 'btn btn-success', tabindex: 3, outlet: "saveButton"
-          @button "cancel", class: 'btn btn', tabindex: 4, outlet: "cancelButton"
+          @button "cancel", class: 'btn', tabindex: 4, outlet: "cancelButton"
           
           
   initialize: (options={}) ->
@@ -30,12 +30,20 @@ module.exports = class DialogView extends View
     @subscriptions.add @saveButton.click @_onSaveClick
     @subscriptions.add @cancelButton.click @_onCancelClick
     @subscriptions.add @click (evt) => @_onBackdropClick(evt)
-    @subscriptions.add @find('input[type="text"], button').keypress @_onEnterSave
-    @subscriptions.add @keypress @_onEnterSave
+    @subscriptions.add @find('input[type="text"], button').keydown @_onEnterSave
+    @subscriptions.add @keydown @_onEnterSave
     
     
   destroy: =>
     @subscriptions.destroy()
+    super
+    
+    
+  show: =>
+    super
+    
+    
+  hide: =>
     super
     
     
@@ -70,6 +78,8 @@ module.exports = class DialogView extends View
     
   _onEnterSave: (evt) =>
     if evt.which == 13
+      evt.preventDefault()
+      evt.stopImmediatePropagation()
       @_onSaveClick()
       
       
