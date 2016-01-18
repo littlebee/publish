@@ -7,7 +7,7 @@ module.exports = class PublishView extends View
     @div id: "publishModalBackdrop", class: "publish-modal-backdrop", =>
       @div class: "publish-modal", =>
         @div class: "modal-header", =>
-          @h5 "Currently at Version: #{currentVersion}"
+          @h5 class: "version" 
         @div class: "modal-body native-key-bindings", =>
           @label "New version to publish:"
           @input type: "text", tabindex: 1, outlet: "newVersion"
@@ -22,6 +22,7 @@ module.exports = class PublishView extends View
           @button "publish", class: 'btn btn-success', tabindex: 3, outlet: "saveButton"
           @button "cancel", class: 'btn', tabindex: 4, outlet: "cancelButton"
   
+  
   initialize: (currentVersion, newVersion) ->
     @subscriptions = new CompositeDisposable()
 
@@ -32,11 +33,13 @@ module.exports = class PublishView extends View
     @subscriptions.add @newVersion.keypress @_onEnterPublish
     
     
-  show: () =>
-    super
+  showFor: (currentVersion, newVersion) =>
+    @show()
+    @find('.version').html("Currently at Version: #{currentVersion}")
+    @newVersion.val(newVersion)
     @newVersion.focus()
     
-    
+        
   hide: () =>
     super
     

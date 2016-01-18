@@ -21,7 +21,9 @@
   "engines": {
     "atom": ">=1.0.0 <2.0.0"
   },
-  "dependencies": {},
+  "dependencies": {
+    "git-log-utils": "^0.1.3"
+  },
   "devDependencies": {
     "atom-space-pen-views": "^2.1.0"
   }

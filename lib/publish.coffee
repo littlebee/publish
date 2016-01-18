@@ -28,8 +28,7 @@ module.exports = Publish =
       console.log evt
       alert "yay, you published #{publishInputs.newVersion} with description: '#{publishInputs.description.slice(0, 10)}...'"
     
-    @getCurrentVersion()
-    
+
   deactivate: ->
     @subscriptions.dispose()
     @publishView.destroy()
@@ -40,29 +39,81 @@ module.exports = Publish =
     
     
   patch: ->
-    @publishView.show()
-    return
-    
-  
+    @version (currentVersion) =>
+      @_bumpVersionPart(2, currentVersion)
+
+
   minor: ->
+    @version (currentVersion) =>
+      @_bumpVersionPart(1, currentVersion)
     
   
   major: ->
+    @version (currentVersion) =>
+      @_bumpVersionPart(0, currentVersion)
     
 
-  version: ->
-    
-    
-  getCurrentVersion: ->
-    packageFiles = {}
-    for path in atom.project.getPaths()
-      pkgFile = Path.join(path, 'package.json')
-      if Fs.existsSync(pkgFile)
-        packageFiles[path] = JSON.parse(Fs.readFileSync(pkgFile).toString())
-    
-    if _.keys(packageFiles).length > 0
-      console.log 'found more than one package file'
+  version: (versionMethod=null)->
+    packageFile = @findPackageJson()
+    unless packageFile?
+      console.warn "unable to find a package.json file"
+      return
       
+    packageObj = JSON.parse(Fs.readFileSync(packageFile))
+    newVersion = versionMethod(packageObj. version)
+    @publishView.showFor(packageObj.version, newVersion)
+    return
+    
+  
+  getCommitsSinceLastTag: (packageJsonFile) ->
+    commits = GitLog.getCommitHistory(Path.dirname(packageJsonFile))
+    commitsOut = []
+    lastVersionFound
+    for commit in commits
+      matches = commit.message.match /^(Prepare )?(\d+\.\d+\.\d+)( release)?$/i
+      if matches?
+        lastVersionFound =  matches[2]
+        break;
+      commitsOut.push commit 
+      
+    
+    return commitsOut
+    
+    
+  findPackageJson: ->
+    editor = atom.workspace.getActiveTextEditor()
+    path = editor?.getPath()
+    unless path
+      alert "Open a file in the package you wish to publish and try again"
+      return
+      
+    path = Path.dirname(path)
+    paths = path.split(/[\\\/]/)
+    index = paths.length
+    packageJsonFile = null
+    while index > 0
+      testPath = Path.join(paths.slice(0, index)..., 'package.json')
+      if Fs.existsSync(testPath)
+        packageJsonFile = testPath
+        break
+      index -= 1
+      
+    unless packageJsonFile?
+      alert "Unable to locate package.json along path #{Path.join(paths...)}"
+      return
+  
+    return packageJsonFile
+    
+  
+  # partIndex: 0=major 1=minor 2=patch ...
+  _bumpVersionPart: (partIndex, currentVersion) ->
+    parts = currentVersion.split('.')
+    if parts.length <= partIndex
+      for i in [parts.length..partIndex] 
+        parts.push "0"
+        
+    parts[partIndex] = Number.parseInt(parts[partIndex]) + 1
+    return parts.join('.')
     
     
     
