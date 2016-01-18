@@ -1,73 +1,74 @@
 {$, View} = require "atom-space-pen-views"
 {CompositeDisposable} = require 'atom'
 
-module.exports = class PublishView extends View
-  
-  @content = (currentVersion, newVersion) ->
-    @div id: "publishModalBackdrop", class: "publish-modal-backdrop", =>
-      @div class: "publish-modal", =>
-        @div class: "modal-header", =>
-          @h5 class: "version" 
-        @div class: "modal-body native-key-bindings", =>
-          @label "New version to publish:"
-          @input type: "text", tabindex: 1, outlet: "newVersion"
-          @textarea 
-            tabindex: 2 
-            rows: 4, 
-            cols: 50, 
-            placeholder: "optional summary description for change log"
-            outlet: "description"
-            
-        @div class: "modal-footer", =>
-          @button "publish", class: 'btn btn-success', tabindex: 3, outlet: "saveButton"
-          @button "cancel", class: 'btn', tabindex: 4, outlet: "cancelButton"
-  
-  
-  initialize: (currentVersion, newVersion) ->
-    @subscriptions = new CompositeDisposable()
+DialogView = require './dialog-view'
 
-    @appendTo atom.views.getView atom.workspace
-    @subscriptions.add @saveButton.click @_onPublishClick
-    @subscriptions.add @cancelButton.click @_onCancelClick
-    @subscriptions.add $('#publishModalBackdrop').click @_onBackdropClick
-    @subscriptions.add @newVersion.keypress @_onEnterPublish
+module.exports = class PublishView extends DialogView
+  
+  @getTitle: () =>
+    
+  
+  @innerContent: () ->
+    @div class: "left", =>
+      @label "New version to publish:"
+      @input type: "text", tabindex: 1, outlet: "newVersion"
+      @textarea 
+        tabindex: 2 
+        rows: 4, 
+        cols: 40, 
+        placeholder: "optional summary description for change log"
+        outlet: "description"
+    @div class: "right", =>
+      @h5 class: "commit-count"
+      @div class: "commits"
+      @div class: "scroll-shadow"
     
     
-  showFor: (currentVersion, newVersion) =>
+  initialize: () ->
+    super
+    @saveButton.text("Publish")
+    
+
+  # takes `commit` objects from GitLog 
+  showFor: (currentVersion, newVersion, @commits) =>
     @show()
-    @find('.version').html("Currently at Version: #{currentVersion}")
+    @_updateVersions(currentVersion, newVersion)
+    @_updateCommits(@commits)
+    
+  getSaveAttributes: () =>
+    return {
+      newVersion: @newVersion.val()
+      description: @description.val()
+      commits: @commits
+    }
+    
+        
+  _updateVersions: (currentVersion, newVersion) ->
+    @find('.dialog-title').html("Currently at Version: #{currentVersion}")
     @newVersion.val(newVersion)
     @newVersion.focus()
     
-        
-  hide: () =>
-    super
     
+  _updateCommits: (commits) =>
+    $commits = @find('.commits')
+    unless commits?.length > 0
+      $commits.html("There have not been any commits since the last tag")
+      return
+    $commits.html("")
+    for commit in commits
+      $commits.append @_renderCommit(commit)
     
-
-  destroy: () =>
-    @subscriptions.destroy()
-    super
+    @find('.commit-count').text("#{commits.length} Commits Since Last Tag")
+    return
     
+  _renderCommit: (commit) =>
+    return """
+      <div class="commit">
+        <a href="#{commit.link}">#{commit.hash}</a> 
+        by #{commit.authorName} #{commit.relativeDate}:
+        <div>
+          #{commit.message}
+        </div>
+      </div>
+    """
     
-  _onPublishClick: (evt) =>
-    @hide()
-    @trigger 'publish', 
-      newVersion: @newVersion.val()
-      description: @description.val()
-    
-    
-  _onCancelClick: (evt) =>
-    @trigger 'cancel', evt
-    @hide()
-    
-    
-  _onBackdropClick: (evt) =>
-    if $(evt.target).is("#publishModalBackdrop")
-      @_onCancelClick(evt)
-    
-    
-  _onEnterPublish: (evt) =>
-    if evt.which == 13
-      @_onPublishClick()
-  

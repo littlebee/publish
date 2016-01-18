@@ -2,9 +2,12 @@
 Fs = require 'fs'
 Path = require 'path'
 _ = require 'underscore'
+GitLog = require 'git-log-utils'
+
+{TextEditor, CompositeDisposable} = require 'atom'
 
 PublishView = require './publish-view'
-{TextEditor, CompositeDisposable} = require 'atom'
+PublishProgressView = require './publish-progress-view'
 
 
 module.exports = Publish =
@@ -14,6 +17,7 @@ module.exports = Publish =
 
   activate: (state) ->
     @publishView = new PublishView(state.publishViewState)
+    @publishProgressView = new PublishProgressView()
 
     # Events subscribed to in atom's system can be easily cleaned up with a CompositeDisposable
     @subscriptions = new CompositeDisposable
@@ -24,9 +28,8 @@ module.exports = Publish =
     @subscriptions.add atom.commands.add 'atom-workspace', 'publish:major': => @major()
     @subscriptions.add atom.commands.add 'atom-workspace', 'publish:version': => @version()
     
-    @subscriptions.add @publishView.on "publish", (evt, publishInputs)->
-      console.log evt
-      alert "yay, you published #{publishInputs.newVersion} with description: '#{publishInputs.description.slice(0, 10)}...'"
+    @subscriptions.add @publishView.on "save", (evt, attributes) => @_onPublish(attributes)
+    @subscriptions.add @publishProgressView.on "cancel", @_onCancel
     
 
   deactivate: ->
@@ -60,31 +63,38 @@ module.exports = Publish =
       return
       
     packageObj = JSON.parse(Fs.readFileSync(packageFile))
-    newVersion = versionMethod(packageObj. version)
-    @publishView.showFor(packageObj.version, newVersion)
+    currentVersion = packageObj.version
+    newVersion = versionMethod(currentVersion)
+    
+    [commits, lastVersionTag] = @getCommitsSinceLastTag(packageFile)
+    if lastVersionTag != currentVersion
+      console.log "Found last version in git log #{lastVersionTag} differs from package.json version #{currentVersion}.  Using version from git log."
+      currentVersion = lastVersionTag
+      
+    @publishView.showFor(currentVersion, newVersion, commits)
     return
     
   
   getCommitsSinceLastTag: (packageJsonFile) ->
     commits = GitLog.getCommitHistory(Path.dirname(packageJsonFile))
     commitsOut = []
-    lastVersionFound
+    lastVersionTag = null
     for commit in commits
       matches = commit.message.match /^(Prepare )?(\d+\.\d+\.\d+)( release)?$/i
       if matches?
-        lastVersionFound =  matches[2]
+        lastVersionTag =  matches[2]
         break;
       commitsOut.push commit 
       
     
-    return commitsOut
+    return [commitsOut, lastVersionTag]
     
     
   findPackageJson: ->
     editor = atom.workspace.getActiveTextEditor()
     path = editor?.getPath()
     unless path
-      alert "Open a file in the package you wish to publish and try again"
+      alert 'Publish: Open a file in the package you wish to publish and try again'
       return
       
     path = Path.dirname(path)
@@ -99,7 +109,7 @@ module.exports = Publish =
       index -= 1
       
     unless packageJsonFile?
-      alert "Unable to locate package.json along path #{Path.join(paths...)}"
+      alert "Publish: Unable to locate package.json along path #{Path.join(paths...)}"
       return
   
     return packageJsonFile
@@ -114,6 +124,15 @@ module.exports = Publish =
         
     parts[partIndex] = Number.parseInt(parts[partIndex]) + 1
     return parts.join('.')
+    
+    
+  _onPublish:  (attributes) ->
+    @publishProgressView.show()
+    
+    @publishProgressView.messageUser "yay, you published #{attributes.newVersion} with description: '#{attributes.description.slice(0, 10)}...' " +
+      "and #{attributes.commits.length} commits"
+      
+  
     
     
     
