@@ -16,7 +16,7 @@ module.exports = Publish =
   subscriptions: null
 
   activate: (state) ->
-    @publishView = new PublishView(state.publishViewState)
+    @publishView = new PublishView()
     @publishProgressView = new PublishProgressView()
 
     # Events subscribed to in atom's system can be easily cleaned up with a CompositeDisposable
