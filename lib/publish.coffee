@@ -85,7 +85,6 @@ module.exports = Publish =
         lastVersionTag =  matches[2]
         break;
       commitsOut.push commit 
-      
     
     return [commitsOut, lastVersionTag]
     
@@ -118,9 +117,9 @@ module.exports = Publish =
   # partIndex: 0=major 1=minor 2=patch ...
   _bumpVersionPart: (partIndex, currentVersion) ->
     parts = currentVersion.split('.')
-    if parts.length <= partIndex
-      for i in [parts.length..partIndex] 
-        parts.push "0"
+    if partIndex < parts.length
+      for i in [(partIndex + 1)..(parts.length - 1)] 
+        parts[i] = "0"
         
     parts[partIndex] = Number.parseInt(parts[partIndex]) + 1
     return parts.join('.')
