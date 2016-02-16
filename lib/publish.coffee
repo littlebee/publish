@@ -2,7 +2,9 @@
 Fs = require 'fs'
 Path = require 'path'
 _ = require 'underscore'
+
 GitLog = require 'git-log-utils'
+GitStatus = require 'git-status-utils'
 
 {TextEditor, CompositeDisposable} = require 'atom'
 
@@ -59,8 +61,13 @@ module.exports = Publish =
   version: (versionMethod=null)->
     packageFile = @findPackageJson()
     unless packageFile?
-      console.warn "unable to find a package.json file"
+      alert "Publish: unable to find a package.json file"
       return
+      
+    gitStatus = GitStatus.getStatus Path.dirname(packageFile)
+    if gitStatus.stagedChanges.length > 0 || gitStatus.unstagedChanges.length > 0
+      alert "Publish: Cowardly refusing to publish.  Uncommitted changes exist on current branch (#{gitStatus.branch})"
+      return 
       
     packageObj = JSON.parse(Fs.readFileSync(packageFile))
     currentVersion = packageObj.version
@@ -90,25 +97,17 @@ module.exports = Publish =
     
     
   findPackageJson: ->
-    editor = atom.workspace.getActiveTextEditor()
-    path = editor?.getPath()
-    unless path
-      alert 'Publish: Open a file in the package you wish to publish and try again'
+    projectDir = atom.project.getDirectories()[0]
+    unless projectDir?
+      alert 'Publish: Open the project directory of the package you wish to publish and try again'
       return
       
-    path = Path.dirname(path)
-    paths = path.split(/[\\\/]/)
-    index = paths.length
-    packageJsonFile = null
-    while index > 0
-      testPath = Path.join(paths.slice(0, index)..., 'package.json')
-      if Fs.existsSync(testPath)
-        packageJsonFile = testPath
-        break
-      index -= 1
+    testPath = Path.join(projectDir.getPath(), 'package.json')
+    if Fs.existsSync(testPath)
+      packageJsonFile = testPath
       
     unless packageJsonFile?
-      alert "Publish: Unable to locate package.json along path #{Path.join(paths...)}"
+      alert "Publish: Unable to locate package.json in project directory #{projectDir}"
       return
   
     return packageJsonFile
@@ -118,7 +117,7 @@ module.exports = Publish =
   _bumpVersionPart: (partIndex, currentVersion) ->
     parts = currentVersion.split('.')
     if partIndex < parts.length
-      for i in [(partIndex + 1)..(parts.length - 1)] 
+      for i in [(partIndex + 1)...(parts.length)] 
         parts[i] = "0"
         
     parts[partIndex] = Number.parseInt(parts[partIndex]) + 1
@@ -128,14 +127,21 @@ module.exports = Publish =
   _onPublish:  (attributes) ->
     @publishProgressView.show()
     
+    
     @publishProgressView.messageUser "yay, you published #{attributes.newVersion} with description: '#{attributes.description.slice(0, 10)}...' " +
       "and #{attributes.commits.length} commits"
       
     _.delay (=>@publishProgressView.done()), 3000
       
-  
     
-    
+  _execNpmPublishCommands: (newVersion) ->
+    ###
+      npm version #{newVersion}
+      git push origin master
+      git push origin --tags
+      npm publish
+      
+    ###
     
   
   
