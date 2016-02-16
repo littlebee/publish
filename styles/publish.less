@@ -31,7 +31,7 @@
     color: grey;
   }
   
-  input {
+  .left input {
     margin-bottom: 12px;
     margin-left: 7px;
   }
@@ -105,10 +105,23 @@
   .right {
     width: 245px;
   }
+  
+  h5 {
+    margin-top: 0px;
+  }
+  a {
+    text-decoration: underline;
+  }
+  
+  .commit-count {
+    margin-bottom: 8px;
+    margin-top: -7px;
+    text-align: center;
+  }
 
 }
 .publish-modal .commits {
-  height: 190px;
+  height: 170px;
   overflow-y: scroll;
       
   .commit {
@@ -118,10 +131,15 @@
     font-size: 13px;
     font-weight: bold;
   }
+  label,input {
+    cursor: pointer;
+  }
+  
 }
 
 .publish-modal .scroll-shadow {
-  box-shadow: rgba(197, 197, 197, 0.97) 4px -11px 29px 5px; 
+  border-top: 1px solid rgba(197, 197, 197, 0.97);
+  box-shadow: #f1f1f1 5px -16px 50px 5px;
 }
 
 

@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "atom-space-pen-views": "^2.1.0",
-    "bumble-strings": "^0.2.1",
+    "bumble-strings": "^0.3.0",
     "git-log-utils": "^0.1.3",
     "git-status-utils": "^0.1.1",
     "underscore": "^1.8.3"

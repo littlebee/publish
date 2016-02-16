@@ -1,6 +1,7 @@
 {$, View} = require "atom-space-pen-views"
 {CompositeDisposable} = require 'atom'
 
+_ = require 'underscore'
 BStr = require 'bumble-strings'
 
 DialogView = require './dialog-view'
@@ -22,13 +23,31 @@ module.exports = class PublishView extends DialogView
         outlet: "description"
     @div class: "right", =>
       @h5 class: "commit-count"
+      @div => @label "Include in change log?"
       @div class: "commits scrollbars-visible-always"
-      @div class: "scroll-shadow"
+      @div class: "scroll-shadow select-controls", =>
+        @raw "Select:&nbsp;&nbsp#{@_renderSelectLinks()}"
+    
+    
+  @_renderSelectLinks: () ->
+    links = []
+    links.push @_renderSelectLink(className, name) for className, name of {
+      'select-all': 'all'
+      'select-none': 'none'
+      'select-stars': ':star: and :bug: only'
+    } 
+    return links.slice(0, -1).join(', ') + " or " + links.slice(-1)
+    
+    
+  @_renderSelectLink: (className, name) ->
+    """<a class="text-info #{className}">#{name}</a>"""
+    
     
     
   initialize: () ->
     super
     @saveButton.text("Publish")
+    @_initializeSelectLinks()
     
 
   # takes `commit` objects from GitLog 
@@ -39,11 +58,23 @@ module.exports = class PublishView extends DialogView
     
     
   getSaveAttributes: () =>
+    selectedCommits = _.filter @commits, (commit) =>
+      @find(".commit[data-id='#{commit.id}'] input").prop('checked')
+    
     return {
       newVersion: @newVersion.val()
       description: @description.val()
-      commits: @commits
+      commits: selectedCommits
     }
+    
+    
+  _initializeSelectLinks: ->
+    @find('.select-all').click => @find('.commit input').prop('checked', true) 
+    @find('.select-none').click => @find('.commit input').prop('checked', false) 
+    @find('.select-stars').click =>
+      @find('.commit input').prop('checked', false) 
+      for commit in _.filter(@commits, (c) -> BStr.weaklyHas(c.message, [':star:', ':bug']))
+        @find(".commit[data-id='#{commit.id}'] input").prop('checked', true)
     
         
   _updateVersions: (currentVersion, newVersion) ->
@@ -66,8 +97,9 @@ module.exports = class PublishView extends DialogView
     
   _renderCommit: (commit) =>
     return """
-      <div class="commit">
-        #{@_renderCommitLink(commit)} by #{commit.authorName} #{commit.relativeDate}: #{commit.message}
+      <div class="commit" data-id="#{commit.id}">
+        <label><input type="checkbox" checked> #{commit.hash}</label> by #{commit.authorName} #{commit.relativeDate}: #{commit.message}
+        #{@_renderCommitLink(commit)}
       </div>
     """
     
@@ -76,12 +108,12 @@ module.exports = class PublishView extends DialogView
     repoUrl = @package.repository?.url || @package.repository 
     unless repoUrl? && BStr.weaklyHas(repoUrl, 'github.com')
       console.log "Publish: repository not found in package json or is not a github repo. not rendering commit link", repoUrl
-      return commit.hash
+      return ""
     
     matches = repoUrl.match /[^\:]*\:(\/\/github.com\/)?([^\.]*)/
     commitHref = "https://github.com/#{matches[2]}/commit/#{commit.id}"
       
-    return """<a class="text-info" href="#{commitHref}">#{commit.hash}</a>"""
+    return """<a class="text-info" title="view revision diff on github" href="#{commitHref}">...</a>"""
     
     
     
