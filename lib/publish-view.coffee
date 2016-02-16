@@ -1,6 +1,8 @@
 {$, View} = require "atom-space-pen-views"
 {CompositeDisposable} = require 'atom'
 
+BStr = require 'bumble-strings'
+
 DialogView = require './dialog-view'
 
 module.exports = class PublishView extends DialogView
@@ -30,10 +32,11 @@ module.exports = class PublishView extends DialogView
     
 
   # takes `commit` objects from GitLog 
-  showFor: (currentVersion, newVersion, @commits) =>
+  showFor: (currentVersion, newVersion, @commits, @gitStatus, @package) =>
     @show()
     @_updateVersions(currentVersion, newVersion)
     @_updateCommits(@commits)
+    
     
   getSaveAttributes: () =>
     return {
@@ -64,8 +67,22 @@ module.exports = class PublishView extends DialogView
   _renderCommit: (commit) =>
     return """
       <div class="commit">
-        <a href="#{commit.link}">#{commit.hash}</a> 
-        by #{commit.authorName} #{commit.relativeDate}: #{commit.message}
+        #{@_renderCommitLink(commit)} by #{commit.authorName} #{commit.relativeDate}: #{commit.message}
       </div>
     """
+    
+  # like https://github.com/littlebee/git-status-utils/commit/19a4528629e9384f5ccd439ff241bb9bd5223cd8
+  _renderCommitLink: (commit) =>
+    repoUrl = @package.repository?.url || @package.repository 
+    unless repoUrl? && BStr.weaklyHas(repoUrl, 'github.com')
+      console.log "Publish: repository not found in package json or is not a github repo. not rendering commit link", repoUrl
+      return commit.hash
+    
+    matches = repoUrl.match /[^\:]*\:(\/\/github.com\/)?([^\.]*)/
+    commitHref = "https://github.com/#{matches[2]}/commit/#{commit.id}"
+      
+    return """<a class="text-info" href="#{commitHref}">#{commit.hash}</a>"""
+    
+    
+    
     

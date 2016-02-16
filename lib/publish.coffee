@@ -78,7 +78,7 @@ module.exports = Publish =
       console.log "Found last version in git log #{lastVersionTag} differs from package.json version #{currentVersion}.  Using version from git log."
       currentVersion = lastVersionTag
       
-    @publishView.showFor(currentVersion, newVersion, commits)
+    @publishView.showFor(currentVersion, newVersion, commits, gitStatus, packageObj)
     return
     
   
