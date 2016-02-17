@@ -8,10 +8,11 @@ DialogView = require './dialog-view'
 
 module.exports = class PublishView extends DialogView
   
-  @getTitle: () => ""
-    
+  # title is render at display time below.  see updateVersions()
+  @renderTitle: () => ""
+
   
-  @innerContent: () ->
+  @renderBodyContent: () ->
     @div class: "left", =>
       @label "New version to publish:"
       @input type: "text", tabindex: 1, outlet: "newVersion"
@@ -28,6 +29,11 @@ module.exports = class PublishView extends DialogView
       @div class: "scroll-shadow select-controls", =>
         @raw "Select:&nbsp;&nbsp#{@_renderSelectLinks()}"
     
+    
+  @renderFooterContent: () ->
+    super
+    @span class: "warnings text-error"
+
     
   @_renderSelectLinks: () ->
     links = []
@@ -55,6 +61,7 @@ module.exports = class PublishView extends DialogView
     @show()
     @_updateVersions(currentVersion, newVersion)
     @_updateCommits(@commits)
+    @_updateWarnings(@gitStatus)
     
     
   getSaveAttributes: () =>
@@ -94,6 +101,15 @@ module.exports = class PublishView extends DialogView
     
     @find('.commit-count').text("#{commits.length} Commits Since Last Tag")
     return
+    
+    
+  _updateWarnings: (gitStatus) =>
+    @find('.warnings').text ''
+    unless gitStatus.branch == 'master'
+      @find('.warnings').text "Not on master branch, but you probably should be"
+    
+      
+      
     
   _renderCommit: (commit) =>
     return """

@@ -8,8 +8,9 @@ module.exports = class PublishProgressView extends DialogView
   
   @getTitleText: -> "Publishing Progress"
   
-  @innerContent: () ->
-    @div class: "inner fill scroll"
+  @renderBodyContent: () ->
+    @div class: "inner fill scroll", => "publishing..."
+  
   
   initialize: (options={}) ->
     options = _.defaults options,

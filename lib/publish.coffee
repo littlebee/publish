@@ -126,12 +126,14 @@ module.exports = Publish =
     
   _onPublish:  (attributes) ->
     @publishProgressView.show()
+    @publishProgressView.messageUser "(pretending to publish)"
     
-    
-    @publishProgressView.messageUser "yay, you published #{attributes.newVersion} with description: '#{attributes.description.slice(0, 10)}...' " +
-      "and #{attributes.commits.length} commits"
-      
-    _.delay (=>@publishProgressView.done()), 3000
+    _.delay =>
+      @publishProgressView.messageUser "yay, you would have published #{attributes.newVersion} with description: 
+        '#{attributes.description.slice(0, 10)}...' 
+        and #{attributes.commits.length} commits"
+      @publishProgressView.done()
+    , 3000
       
     
   _execNpmPublishCommands: (newVersion) ->
