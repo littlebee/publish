@@ -11,6 +11,8 @@ GitStatus = require 'git-status-utils'
 PublishView = require './publish-view'
 PublishProgressView = require './publish-progress-view'
 
+ChangeLog = require './change-log'
+
 
 module.exports = Publish =
   publishView: null
@@ -69,8 +71,8 @@ module.exports = Publish =
       alert "Publish: Cowardly refusing to publish.  Uncommitted changes exist on current branch (#{gitStatus.branch})"
       return 
       
-    packageObj = JSON.parse(Fs.readFileSync(packageFile))
-    currentVersion = packageObj.version
+    @npmPackage = JSON.parse(Fs.readFileSync(packageFile))
+    currentVersion = @npmPackage.version
     newVersion = versionMethod(currentVersion)
     
     [commits, lastVersionTag] = @getCommitsSinceLastTag(packageFile)
@@ -78,7 +80,7 @@ module.exports = Publish =
       console.log "Found last version in git log #{lastVersionTag} differs from package.json version #{currentVersion}.  Using version from git log."
       currentVersion = lastVersionTag
       
-    @publishView.showFor(currentVersion, newVersion, commits, gitStatus, packageObj)
+    @publishView.showFor(currentVersion, newVersion, commits, gitStatus, @npmPackage)
     return
     
   
@@ -87,7 +89,7 @@ module.exports = Publish =
     commitsOut = []
     lastVersionTag = null
     for commit in commits
-      matches = commit.message.match /^(Prepare )?(\d+\.\d+\.\d+)( release)?$/i
+      matches = commit.message.match /^(Prepare )?(v?\d+\.\d+\.\d+)( release)?$/i
       if matches?
         lastVersionTag =  matches[2]
         break;
@@ -97,10 +99,8 @@ module.exports = Publish =
     
     
   findPackageJson: ->
-    projectDir = atom.project.getDirectories()[0]
-    unless projectDir?
-      alert 'Publish: Open the project directory of the package you wish to publish and try again'
-      return
+    projectDir = @_getProjectDir()
+    return null unless projectDir?
       
     testPath = Path.join(projectDir.getPath(), 'package.json')
     if Fs.existsSync(testPath)
@@ -112,6 +112,15 @@ module.exports = Publish =
   
     return packageJsonFile
     
+    
+  _getProjectDir: ->
+    projectDir = atom.project.getDirectories()[0]
+    unless projectDir?
+      alert 'Publish: Open the project directory of the package you wish to publish and try again'
+      return null
+    return projectDir
+    
+
   
   # partIndex: 0=major 1=minor 2=patch ...
   _bumpVersionPart: (partIndex, currentVersion) ->
@@ -128,13 +137,15 @@ module.exports = Publish =
     @publishProgressView.show()
     @publishProgressView.messageUser "(pretending to publish)"
     
+    @_updateChangeLog(attributes)
+    
     _.delay =>
-      @publishProgressView.messageUser "yay, you would have published #{attributes.newVersion} with description: 
+      @publishProgressView.messageUser "Done.<br><br>yay, you would have published #{attributes.newVersion} with description: 
         '#{attributes.description.slice(0, 10)}...' 
         and #{attributes.commits.length} commits"
       @publishProgressView.done()
     , 3000
-      
+
     
   _execNpmPublishCommands: (newVersion) ->
     ###
@@ -145,6 +156,24 @@ module.exports = Publish =
       
     ###
     
+    
+  _updateChangeLog: (attributes) ->
+    projectDir = @_getProjectDir()
+    return null unless projectDir
+    
+    changeLogFile = Path.join(projectDir.getPath(), 'CHANGELOG.md')
+    @publishProgressView.messageUser "Updating #{changeLogFile}..."
+    
+    repoUrl = @npmPackage.repository?.url || @npmPackage.repository 
+    changeLog = new ChangeLog(changeLogFile, repoUrl)
+    changeLog.set(attributes.newVersion, attributes.description, attributes.commits)
+    changeLog.write()
+    
+    
+    
+    
+
+
   
   
     

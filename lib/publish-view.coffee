@@ -57,7 +57,7 @@ module.exports = class PublishView extends DialogView
     
 
   # takes `commit` objects from GitLog 
-  showFor: (currentVersion, newVersion, @commits, @gitStatus, @package) =>
+  showFor: (currentVersion, newVersion, @commits, @gitStatus, @npmPackage) =>
     @show()
     @_updateVersions(currentVersion, newVersion)
     @_updateCommits(@commits)
@@ -121,7 +121,7 @@ module.exports = class PublishView extends DialogView
     
   # like https://github.com/littlebee/git-status-utils/commit/19a4528629e9384f5ccd439ff241bb9bd5223cd8
   _renderCommitLink: (commit) =>
-    repoUrl = @package.repository?.url || @package.repository 
+    repoUrl = @npmPackage.repository?.url || @npmPackage.repository 
     unless repoUrl? && BStr.weaklyHas(repoUrl, 'github.com')
       console.log "Publish: repository not found in package json or is not a github repo. not rendering commit link", repoUrl
       return ""
