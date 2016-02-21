@@ -35,6 +35,11 @@ module.exports = class PublishProgressView extends DialogView
     @$console.html(@currentMessages)
     
     
+  reset: () ->
+    @currentMessages = ""
+    @$console.html(@currentMessages)
+    
+    
   # primarily toggles cancel button to OK and 
   done: (message="") ->
     @showOkButton()

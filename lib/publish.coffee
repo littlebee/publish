@@ -134,6 +134,7 @@ module.exports = Publish =
     
     
   _onPublish:  (attributes) ->
+    @publishProgressView.reset()
     @publishProgressView.show()
     @publishProgressView.messageUser "(pretending to publish)"
     
@@ -154,6 +155,14 @@ module.exports = Publish =
       git push origin --tags
       npm publish
       
+      
+ 1923  git commit -am ':bug: lines affected for dir should be the sum of files. + added and removed (moved to own repo) git-status-utils'
+ 1924  git push origin master
+ 1925  npm version
+ 1926  npm version patch
+ 1927  git push origin master
+ 1928  git push origin --tags
+ 1929  npm publish      
     ###
     
     

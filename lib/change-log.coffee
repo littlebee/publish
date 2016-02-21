@@ -83,7 +83,7 @@ module.exports = class ChangeLog
     options = _.defaults options,
       repoUrl: @repoUrl
     
-    previousTag = @orderedKeys[@orderedKeys.indexOf(tag) + 1]
+    previousTag = @orderedKeys[@orderedKeys.indexOf(tag) + 1] || "0.0.0"
     return "## [#{tag}](#{options.repoUrl}/compare/#{previousTag}...#{tag}) (#{Moment().format('YYYY-MM-DDD')})"
     
     
@@ -105,7 +105,7 @@ module.exports = class ChangeLog
       continue unless commitsByType[group].length > 0
       commitLines.push "### #{name}"
       for commit in commitsByType[group]
-        commitLines.push "* [#{commit.hash}](#{repoUrl}/commit/#{commit.id}) #{commit.message}"
+        commitLines.push "* [#{commit.hash}](#{repoUrl}/commit/#{commit.id}) #{commit.message.replace(/\:(bug|star)\:/g, '')}"
       commitLines.push ""
     
     return commitLines
