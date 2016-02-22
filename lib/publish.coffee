@@ -10,6 +10,7 @@ GitStatus = require 'git-status-utils'
 
 PublishView = require './publish-view'
 PublishProgressView = require './publish-progress-view'
+CommandExecutor = require './command-executor'
 
 ChangeLog = require './change-log'
 
@@ -22,6 +23,10 @@ module.exports = Publish =
   activate: (state) ->
     @publishView = new PublishView()
     @publishProgressView = new PublishProgressView()
+    @executor = new CommandExecutor 
+      onOutput: (data) => @_onCommandOutput(data)
+      onError: (data) => @_onCommandError(data)
+      onFail: (code) => @_onPublishFail(code)
 
     # Events subscribed to in atom's system can be easily cleaned up with a CompositeDisposable
     @subscriptions = new CompositeDisposable
@@ -66,9 +71,9 @@ module.exports = Publish =
       alert "Publish: unable to find a package.json file"
       return
       
-    gitStatus = GitStatus.getStatus Path.dirname(packageFile)
-    if gitStatus.stagedChanges.length > 0 || gitStatus.unstagedChanges.length > 0
-      alert "Publish: Cowardly refusing to publish.  Uncommitted changes exist on current branch (#{gitStatus.branch})"
+    @gitStatus = GitStatus.getStatus Path.dirname(packageFile)
+    if @gitStatus.stagedChanges.length > 0 || @gitStatus.unstagedChanges.length > 0
+      alert "Publish: Cowardly refusing to publish.  Uncommitted changes exist on current branch (#{@gitStatus.branch})"
       return 
       
     @npmPackage = JSON.parse(Fs.readFileSync(packageFile))
@@ -80,7 +85,7 @@ module.exports = Publish =
       console.log "Found last version in git log #{lastVersionTag} differs from package.json version #{currentVersion}.  Using version from git log."
       currentVersion = lastVersionTag
       
-    @publishView.showFor(currentVersion, newVersion, commits, gitStatus, @npmPackage)
+    @publishView.showFor(currentVersion, newVersion, commits, @gitStatus, @npmPackage)
     return
     
   
@@ -136,34 +141,25 @@ module.exports = Publish =
   _onPublish:  (attributes) ->
     @publishProgressView.reset()
     @publishProgressView.show()
-    @publishProgressView.messageUser "(pretending to publish)"
+    @publishProgressView.messageUser "<h5>Publishing #{attributes.newVersion}...</h5>"
     
     @_updateChangeLog(attributes)
     
-    _.delay =>
-      @publishProgressView.messageUser "Done.<br><br>yay, you would have published #{attributes.newVersion} with description: 
-        '#{attributes.description.slice(0, 10)}...' 
-        and #{attributes.commits.length} commits"
-      @publishProgressView.done()
-    , 3000
-
+    subcommands = if @_isAtomPackage()
+      @_getApmCommands(attributes.newVersion) 
+    else 
+      @_getNpmCommands(attributes.newVersion)
+      
+    commands = [
+      "git add CHANGELOG.md"
+      "git commit -m 'updated changelog via atom:publish'"
+      "git pull origin #{@gitStatus.branch}"
+    ].concat(subcommands, [(=> @_onPublishSuccess(attributes.newVersion))])
     
-  _execNpmPublishCommands: (newVersion) ->
-    ###
-      npm version #{newVersion}
-      git push origin master
-      git push origin --tags
-      npm publish
-      
-      
- 1923  git commit -am ':bug: lines affected for dir should be the sum of files. + added and removed (moved to own repo) git-status-utils'
- 1924  git push origin master
- 1925  npm version
- 1926  npm version patch
- 1927  git push origin master
- 1928  git push origin --tags
- 1929  npm publish      
-    ###
+    @executor.options.cwd = @_getProjectDir().getPath()
+    
+    console.log "publish: going to execute:", commands
+    @executor.executeCommands commands
     
     
   _updateChangeLog: (attributes) ->
@@ -171,18 +167,52 @@ module.exports = Publish =
     return null unless projectDir
     
     changeLogFile = Path.join(projectDir.getPath(), 'CHANGELOG.md')
-    @publishProgressView.messageUser "Updating #{changeLogFile}..."
-    
+    @publishProgressView.messageUser "Updating #{changeLogFile}...", break: false 
+        
     repoUrl = @npmPackage.repository?.url || @npmPackage.repository 
     changeLog = new ChangeLog(changeLogFile, repoUrl)
     changeLog.set(attributes.newVersion, attributes.description, attributes.commits)
     changeLog.write()
+    @publishProgressView.messageUser ".  Done.<br>"
     
     
+  _isAtomPackage: () ->
+    @npmPackage?.engines?.atom?
     
+    
+  _getApmCommands: (newVersion) ->
+    return [
+      "apm publish #{newVersion}"
+      "git push origin #{@gitStatus.branch}"
+      "git push origin --tags"      
+    ]
+    
+  _getNpmCommands: (newVersion) ->
+    return [
+      "npm version #{newVersion}"
+      "git push origin #{@gitStatus.branch}"
+      "git push origin --tags"
+      "npm publish"
+    ]
+
+    
+  _onCommandOutput: (data) ->
+    @publishProgressView.messageUser data.toString().replace(/\n/g, "<br>")
     
 
+  _onCommandError: (data) ->
+    @publishProgressView.messageUser "<span class='text-error'>#{data.toString()}</span>"
+    
 
+  _onPublishSuccess: (newVersion) ->
+    @publishProgressView.messageUser "<br><br>Done.  You published #{newVersion} and it was good."
+    @publishProgressView.done()
+      
+  
+  _onPublishFail: (code) ->
+    @publishProgressView.messageUser "Failed to publish.  Last command exited with code: #{code}"
+    @publishProgressView.done()
+      
   
   
     

@@ -54,7 +54,7 @@ module.exports = class DialogView extends View
     extreme customization
   ###
   @renderBody: () ->
-    @div class: "modal-body native-key-bindings", => 
+    @div outlet: '$modalBody', class: "modal-body native-key-bindings", => 
       @renderBodyContent()
         
         
