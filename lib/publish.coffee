@@ -156,8 +156,10 @@ module.exports = Publish =
       "git pull origin #{@gitStatus.branch}"
     ].concat(subcommands, [(=> @_onPublishSuccess(attributes.newVersion))])
     
-    @executor.options.cwd = @_getProjectDir().getPath()
+    # cancel any outstanding commands
+    @executor?.cancelCommands()
     
+    @executor.options.cwd = @_getProjectDir().getPath()
     console.log "publish: going to execute:", commands
     @executor.executeCommands commands
     
@@ -182,7 +184,7 @@ module.exports = Publish =
     
   _getApmCommands: (newVersion) ->
     return [
-      "apm publish #{newVersion}"
+      "apm --no-color publish #{newVersion}"
       "git push origin #{@gitStatus.branch}"
       "git push origin --tags"      
     ]
@@ -195,6 +197,10 @@ module.exports = Publish =
       "npm publish"
     ]
 
+
+  _onCancel: () ->
+    @executor?.cancelCommands()
+    
     
   _onCommandOutput: (data) ->
     @publishProgressView.messageUser data.toString().replace(/\n/g, "<br>")
@@ -212,6 +218,8 @@ module.exports = Publish =
   _onPublishFail: (code) ->
     @publishProgressView.messageUser "Failed to publish.  Last command exited with code: #{code}"
     @publishProgressView.done()
+    return false   # don't continue executing commands
+    
       
   
   

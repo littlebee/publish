@@ -63,6 +63,7 @@ module.exports = class CommandExecutor
     return unless @commandQueue?.length > 0
     
     @commandQueue = []
+    @draining = false;
     unless options.quiet
       @options.onError?("Canceled")
       @options.onFail?(1)
