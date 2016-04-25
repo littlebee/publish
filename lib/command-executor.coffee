@@ -5,10 +5,10 @@ exec = require('child_process').exec
 
 
 ###
-  This is a serial command runner.  
+  This is a serial command runner.
 ###
 module.exports = class CommandExecutor
-  
+
   constructor: (options={}) ->
     @options = _.defaults options,
       # callback method to call with command output as it is available
@@ -22,23 +22,23 @@ module.exports = class CommandExecutor
       # when true, stop a first command failure, you can manually resume afterwards
       # by calling .nextCommand()
       stopOnFail: true
-      
+
     @commandQueue = []
     @draining = false
-    
+
   ###
     commands argument is an array of shell commands to execute serially.
-    
+
     Commands array can also have function members. If a command is a function
-    that function is called after the command before it finishes.  
-    
+    that function is called after the command before it finishes.
+
     If a shell command returns an exit code !== 0, then it is considered a fail.
-    If a command function returns false it is considered a fail.  
-    
+    If a command function returns false it is considered a fail.
+
     When a fail occurs and constructor option stopOnFail is true (default), then
     all commands and command functions after the fail are cleared (the queue
     is reset) and the onFail construction option is called if set.
-    
+
     Example - run three commands and then call and then alert the user:
     ```coffeescript
       executor = new CommandExecutor()
@@ -46,48 +46,48 @@ module.exports = class CommandExecutor
         "cp somepath/somefiles someOtherPath/"
         "gzip somefile"
         (-> alert('All finished'))
-      ] 
+      ]
     ```
-  ###  
+  ###
   executeCommands: (commands) ->
     commands = [commands] unless _.isArray(commands)
     @commandQueue = @commandQueue.concat(commands)
     unless @draining
       @nextCommand()
-    
-  
+
+
   cancelCommands: (options={}) ->
     options = _.defaults options,
       quiet: false
-      
+
     return unless @commandQueue?.length > 0
-    
+
     @commandQueue = []
     @draining = false;
     unless options.quiet
       @options.onError?("Canceled")
       @options.onFail?(1)
-  
-    
+
+
   nextCommand: (options = {}) =>
     options = _.defaults options,
       cwd: @options.cwd
-      
+
     unless @commandQueue?.length > 0
       # TODO - add @options onDrained callback?
       @draining = false;
-      return 
-    
+      return
+
     @draining = true;
-    
+
     cmd = @commandQueue.shift()
-    if _.isFunction cmd 
+    if _.isFunction cmd
       unless cmd(@) == false
         @nextCommand()
         return
-    
+
     @options.onOutput?("$ #{cmd}")  # echo command prefaced by $
-    
+
     exec cmd, options, (error, stdout, stderr) =>
       if stderr?.lenth > 0
         @options.onError stderr
@@ -95,18 +95,18 @@ module.exports = class CommandExecutor
         @options.onOutput stdout
       if error && (@options.onFail?(error) == false || @options.stopOnFail)
         @cancelCommands(quiet: true)  # we already reported the error, just flush the queue
-      
+
       @nextCommand()  # let continue to stop draining
-      
-      
-    ## I tried doing the above with BufferedProcess, but it was a pain to have to break up args 
+
+
+    ## I tried doing the above with BufferedProcess, but it was a pain to have to break up args
     ##    and I would have had to make the commands passed in be broken up into cmd and each arg...
     ##    Really, this how class is overly complicated because of async exec.  Why not just
     ##    loop over an array and execSync until one fails.  No queue, no draining....
-    ## The only possible better thing is that the with the child_process.spawn that buffered process
+    ## The only possible better thing is that with the child_process.spawn that buffered process
     ## uses, you can get output before the command finishes
-  
-    # new BufferedProcess 
+
+    # new BufferedProcess
     #   command: cmd
     #   args: [args]
     #   options: options
@@ -116,8 +116,3 @@ module.exports = class CommandExecutor
     #     if code && (@options.onFail?(code) == false || @options.stopOnFail)
     #       @cancelCommands(quiet: true)  # we already reported the error, just flush the queue
     #     @nextCommand()  # let continue to stop draining
-      
-      
-    
-    
-    
