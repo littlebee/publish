@@ -1,5 +1,4 @@
 {$, View} = require "atom-space-pen-views"
-{CompositeDisposable} = require 'atom'
 _ = require 'underscore'
 
 DialogView = require './dialog-view'

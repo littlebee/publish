@@ -1,5 +1,5 @@
 {$, View} = require "atom-space-pen-views"
-{CompositeDisposable} = require 'atom'
+SubAtom = require 'sub-atom'
 _ = require 'underscore'
 
 module.exports = class DialogView extends View
@@ -79,14 +79,14 @@ module.exports = class DialogView extends View
     @instanceOptions = _.defaults options,
       closeOnClickoff: true
       
-    @subscriptions = new CompositeDisposable()
     @appendTo atom.views.getView atom.workspace
     
-    @subscriptions.add @saveButton.click @_onSaveClick
-    @subscriptions.add @cancelButton.click @_onCancelClick
-    @subscriptions.add @click (evt) => @_onBackdropClick(evt)
-    @subscriptions.add @find('input[type="text"], button').keydown @_onEnterSave
-    @subscriptions.add @keydown @_onEnterSave
+    @subscriptions = new SubAtom()
+    @subscriptions.add @saveButton, 'click', @_onSaveClick
+    @subscriptions.add @cancelButton, 'click', @_onCancelClick
+    @subscriptions.add @, 'click',  (evt) => @_onBackdropClick(evt)
+    @subscriptions.add @find('input[type="text"], button'), 'keydown', @_onEnterSave
+    @subscriptions.add @, 'keydown', @_onEnterSave
     
     
   destroy: =>
@@ -147,7 +147,7 @@ module.exports = class DialogView extends View
   _onCancelClick: (evt) => @cancel()
     
     
-  _onBackdropClick: (evt) ->
+  _onBackdropClick: (evt) =>
     if $(evt.target).hasClass("publish-modal-backdrop") && @instanceOptions.closeOnClickoff
       @_onCancelClick(evt)
     

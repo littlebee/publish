@@ -6,7 +6,8 @@ _ = require 'underscore'
 GitLog = require 'git-log-utils'
 GitStatus = require 'git-status-utils'
 
-{TextEditor, CompositeDisposable} = require 'atom'
+{TextEditor} = require 'atom'
+SubAtom = require 'sub-atom'
 
 PublishView = require './publish-view'
 PublishProgressView = require './publish-progress-view'
@@ -29,7 +30,7 @@ module.exports = Publish =
       onFail: (code) => @_onPublishFail(code)
 
     # Events subscribed to in atom's system can be easily cleaned up with a CompositeDisposable
-    @subscriptions = new CompositeDisposable
+    @subscriptions = new SubAtom()
     
     # Register commands
     @subscriptions.add atom.commands.add 'atom-workspace', 'publish:patch': => @patch()
@@ -37,8 +38,8 @@ module.exports = Publish =
     @subscriptions.add atom.commands.add 'atom-workspace', 'publish:major': => @major()
     @subscriptions.add atom.commands.add 'atom-workspace', 'publish:version': => @version()
     
-    @subscriptions.add @publishView.on "save", (evt, attributes) => @_onPublish(attributes)
-    @subscriptions.add @publishProgressView.on "cancel", @_onCancel
+    @subscriptions.add @publishView, "save", (evt, attributes) => @_onPublish(attributes)
+    @subscriptions.add @publishProgressView, "cancel", @_onCancel
     
 
   deactivate: ->
