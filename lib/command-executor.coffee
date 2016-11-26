@@ -72,6 +72,7 @@ module.exports = class CommandExecutor
   nextCommand: (options = {}) =>
     options = _.defaults options,
       cwd: @options.cwd
+      timeout: 10000
 
     unless @commandQueue?.length > 0
       # TODO - add @options onDrained callback?

@@ -84,7 +84,7 @@ module.exports = class ChangeLog
       repoUrl: @repoUrl
     
     previousTag = @orderedKeys[@orderedKeys.indexOf(tag) + 1] || "0.0.0"
-    return "## [#{tag}](#{options.repoUrl}/compare/#{previousTag}...#{tag}) (#{Moment().format('YYYY-MM-DDD')})"
+    return "## [#{tag}](#{options.repoUrl}/compare/#{previousTag}...#{tag}) (#{Moment().format('YYYY-MM-D')})"
     
     
   generateCommitLines: (commits, repoUrl=@repoUrl) ->
