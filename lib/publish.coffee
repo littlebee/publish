@@ -38,8 +38,10 @@ module.exports = Publish =
     @subscriptions.add atom.commands.add 'atom-workspace', 'publish:major': => @major()
     @subscriptions.add atom.commands.add 'atom-workspace', 'publish:version': => @version()
     
-    @subscriptions.add @publishView, "save", (evt, attributes) => @_onPublish(attributes)
-    @subscriptions.add @publishProgressView, "cancel", @_onCancel
+    # @subscriptions.add @publishView, "save", (evt, attributes) => @_onPublish(attributes)
+    # @subscriptions.add @publishProgressView, "cancel", @_onCancel
+    @publishView.on "save", (evt, attributes) => @_onPublish(attributes)
+    @publishProgressView.on "cancel", @_onCancel
     
 
   deactivate: ->
