@@ -22,6 +22,7 @@
     "atom": ">=1.0.0 <2.0.0"
   },
   "dependencies": {
+    "atom-package-deps": "^4.3.1",
     "atom-space-pen-views": "^2.1.0",
     "bumble-strings": "^0.3.0",
     "git-log-utils": "^0.2.2",
