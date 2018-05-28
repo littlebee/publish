@@ -10,12 +10,14 @@
     "version",
     "changelog"
   ],
-  "activationEvents": [
-    "publish:major",
-    "publish:minor",
-    "publish:patch",
-    "publish:version"
-  ],
+  "activationCommands": {
+    "atom-workspace": [
+      "publish:major",
+      "publish:minor",
+      "publish:patch",
+      "publish:version"
+    ]
+  },
   "repository": "https://github.com/atom/publish",
   "license": "MIT",
   "engines": {
