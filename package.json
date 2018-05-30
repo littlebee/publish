@@ -24,14 +24,21 @@
     "atom": ">=1.0.0 <2.0.0"
   },
   "dependencies": {
-    "atom-space-pen-views": "^2.1.0",
     "bumble-strings": "0.3.0",
-    "event-kit": "^2.5.0"
+    "event-kit": "2.5.0",
+    "formik": "0.11.11",
     "git-log-utils": "0.2.2",
     "git-status-utils": "0.3.0",
-    "moment": "^2.11.2",
-    "underscore": "^1.8.3"
+    "moment": "2.22.1",
+    "prop-types": "^15.6.1",
+    "react": "16.4.0",
+    "react-dom": "16.4.0",
+    "underscore": "1.8.3"
   },
   "devDependencies": {
+    "babel-eslint": "8.2.3",
+    "eslint": "4.19.1",
+    "eslint-config-fbjs-opensource": "1.0.0",
+    "eslint-plugin-react": "7.8.2"
   }
 }
