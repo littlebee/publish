@@ -1,0 +1,54 @@
+{
+  "root": true,
+  "parserOptions": {
+    "ecmaVersion": 2018,
+    "ecmaFeatures": {
+      "jsx": true,
+    }
+  },
+  "settings": {
+    "import/core-modules": [
+      "atom"
+    ]
+  },
+  "extends": ["fbjs-opensource"],
+  "rules": {
+    "linebreak-style": 0,
+    "no-param-reassign": 0,
+    "no-useless-escape": 0,
+    "indent": ["error", 2],
+    "semi": [1, "never"],
+    "no-multiple-empty-lines": [1, { "max": 2, "maxBOF": 2 }],
+    "react/jsx-closing-bracket-location": 0,
+    "react/jsx-space-before-closing": 0,
+    "react/jsx-tag-spacing": 0
+  },
+  "globals": {
+    "atom": true,
+    "advanceClock": true,
+    "assert": true,
+    "HTMLElement": true,
+    "MouseEvent": true,
+    "IDBKeyRange": true,
+    "before": true,
+    "beforeEach": true,
+    "after": true,
+    "afterEach": true,
+    "describe": true,
+    "fdescribe": true,
+    "xdescribe": true,
+    "it": true,
+    "xit": true,
+    "stress": true,
+    "waitsForPromise": true,
+    "oneTick": true,
+    "until": true,
+    "runs": true,
+    "openAndActivated": true,
+    "jasmine": true,
+    "expect": true,
+    "spyOn": true,
+    "waitsFor": true,
+    "sinon": true,
+  }
+}
