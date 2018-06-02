@@ -4,7 +4,7 @@
 // for a full listing of what's available.
 @import "ui-variables";
 
-.publish-modal-backdrop {
+.publish--modal-backdrop {
   position: fixed;
   height: 100%;
   width: 100%;
@@ -15,7 +15,7 @@
   background-color: rgba(0, 0, 0, .5);
 }
 
-.publish-modal {
+.publish--modal {
   position: absolute;
   height: 335px;
   width: 667px;
@@ -31,7 +31,7 @@
     color: grey;
   }
 
-  .left input {
+  .publish--left input {
     margin-bottom: 12px;
     margin-left: 7px;
   }
@@ -64,24 +64,17 @@
   button {
     margin-right: 3px;
   }
-
-  .modal-header {
+  .publish--modal-header, .publish--modal-footer {
+    background-color: @tool-panel-background-color;
+  }
+  .publish--modal-header {
     padding: 8px 3px 4px 8px;
     margin-bottom: 5px;
     border-top-left-radius: 7px;
     border-top-right-radius: 7px;
     height: 43px;
   }
-  .modal-header, .modal-footer {
-    background-color: @tool-panel-background-color;
-  }
-  .modal-body {
-    padding: 8px 3px 4px 14px;
-    height: ~"calc(100% - 95px)";
-    overflow: auto;
-  }
-
-  .modal-footer {
+  .publish--modal-footer {
     padding: 11px 3px 9px 8px;
     border-bottom-left-radius: 7px;
     border-bottom-right-radius: 7px;
@@ -89,20 +82,30 @@
     width: 100%;
     bottom: 0px;
   }
+  .publish--scroll-shadow {
+    border-top: 1px solid rgba(197, 197, 197, 0.97);
+    box-shadow: #f1f1f1 5px -16px 50px 5px;
+    margin-top: 2px;
+  }
+  .publish--warnings {
+    float: right;
+    margin-right: 10px;
+  }    
+} // .publish--modal
 
+.publish--modal .publish--modal-body {
+  padding: 8px 3px 4px 14px;
+  height: ~"calc(100% - 95px)";
+  overflow: auto;
 
-}
-
-
-.publish-modal .modal-body {
-  .left, .right {
+  .publish--left, .publish--right {
     display: inline-block;
     vertical-align: top;
   }
-  .left {
+  .publish--left {
     width: 385px;
   }
-  .right {
+  .publish--right {
     width: 245px;
   }
 
@@ -113,37 +116,27 @@
     text-decoration: underline;
   }
 
-  .commit-count {
+  .publish--commit-count {
     margin-bottom: 8px;
     margin-top: -7px;
     text-align: center;
   }
+  .publish--commits {
+    height: 170px;
+    overflow-y: scroll;
 
-}
-.publish-modal .commits {
-  height: 170px;
-  overflow-y: scroll;
-
-  .commit {
-    margin-bottom: 9px;
+    .publish--commit {
+      margin-bottom: 9px;
+    }
+    a {
+      font-size: 13px;
+      font-weight: bold;
+    }
+    label,input {
+      cursor: pointer;
+    }
   }
-  a {
-    font-size: 13px;
-    font-weight: bold;
-  }
-  label,input {
-    cursor: pointer;
-  }
+} //.publish--modal .modal-body
 
-}
 
-.publish-modal .warnings {
-  float: right;
-  margin-right: 10px;
-}
 
-.publish-modal .scroll-shadow {
-  border-top: 1px solid rgba(197, 197, 197, 0.97);
-  box-shadow: #f1f1f1 5px -16px 50px 5px;
-  margin-top: 2px;
-}
