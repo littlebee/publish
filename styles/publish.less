@@ -17,7 +17,9 @@
 
 .publish--modal {
   position: absolute;
-  height: 335px;
+  max-height: 550px;
+  min-height: 100px;
+  height: 85%;
   width: 667px;
   display: block;
   top: 20px;
@@ -29,6 +31,15 @@
 
   label {
     color: grey;
+  }
+  
+  .publish--bottom {
+    label {
+      margin-top: 10px;
+      border-bottom: 1px solid @tool-panel-background-color;
+      display: block;
+      width: 90%;
+    }
   }
 
   .publish--left input {

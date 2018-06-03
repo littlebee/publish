@@ -29,8 +29,9 @@
     "formik": "0.11.11",
     "git-log-utils": "0.2.2",
     "git-status-utils": "0.3.0",
+    "marked": "0.4.0",
     "moment": "2.22.1",
-    "prop-types": "^15.6.1",
+    "prop-types": "15.6.1",
     "react": "16.4.0",
     "react-dom": "16.4.0",
     "underscore": "1.8.3"
