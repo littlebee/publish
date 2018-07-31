@@ -16,3 +16,4 @@ You know those seven steps you have to go through every time you publish to NPM:
 
 Wouldn't it be swell if there were a way to reduce this work?   Well, there is now.
 
+Publish package for Atom
